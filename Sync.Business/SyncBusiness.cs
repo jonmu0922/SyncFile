@@ -31,7 +31,7 @@ namespace Sync.Business
             // 上次同步時間
             DateTime? sourcelastrecord = _source.GetLastRecord(_destination.GetID());
 
-            // 單向
+            // 先做單向
             var folder = _source.GetFolders(true);
 
             foreach (var f in folder)

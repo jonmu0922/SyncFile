@@ -15,8 +15,6 @@ namespace SyncFile.Test.Utility
         {
             DateTime dt = TrelloHelper.IdToDatetime("4d5ea62fd76aa1136000000c");
             Debug.WriteLine(dt.ToString());
-        }
-
-        
+        }        
     }
 }
