@@ -11,8 +11,15 @@ namespace SyncFile.DataAccess.Repository
 {
     public class WindowsFileRepository : AFileRepository, IFileRepository
     {
-        string _basepath = "", 
-               _syncsetting = "_syncsetting.xml";
+        /// <summary>
+        /// basa path
+        /// </summary>
+        string _basepath = "";
+        
+        /// <summary>
+        /// 設定檔檔名
+        /// </summary>
+        string _syncsetting = "_syncsetting.xml";
 
         public WindowsFileRepository(string basepath)
         {
@@ -68,6 +75,7 @@ namespace SyncFile.DataAccess.Repository
             return GetLastSyncRecord(id);
         }
 
+        /*
         public List<SyncFileInfo> GetFiles(string folder)
         {
             List<SyncFileInfo> result = new List<SyncFileInfo>();
@@ -88,12 +96,69 @@ namespace SyncFile.DataAccess.Repository
 
             return result;
         }
+        */
+
+        public List<SyncFileInfo> GetFiles(string folder)
+        {
+            List<SyncFileInfo> result = new List<SyncFileInfo>();
+            string[] files = Directory.GetFiles(_basepath + folder);
+
+            foreach (string name in files)
+            {
+                FileInfo info = new FileInfo(name);
+
+                result.Add(new SyncFileInfo()
+                {
+                    Name = info.Name,
+                    CreateDate = info.CreationTime,
+                    UpdateDate = info.LastWriteTime,
+                    Path = name.Replace(_basepath, "")  // 把路徑換成相對位置                     
+                });
+            }
+
+            return result;
+        }
 
         public byte[] GetFile(string path)
         {
             return File.ReadAllBytes(_basepath + path);
         }
 
+        SyncFolderInfo GetFolder(string path, bool withfile)
+        {
+            DirectoryInfo info = new DirectoryInfo(_basepath + path);
+
+            SyncFolderInfo result = new SyncFolderInfo()
+            {
+                Name = info.Name,
+                Path = path,
+                CreateDate = info.CreationTime,
+                UpdateDate = info.LastWriteTime
+            };
+
+            string[] folders = Directory.GetDirectories(_basepath + path);
+
+            foreach (string folder in folders)
+                result.Folders.Add(GetFolder(folder.Replace(_basepath, ""), withfile));
+
+            if (withfile)
+                result.Files = GetFiles(path);
+
+            return result;
+        }
+
+        public List<SyncFolderInfo> GetFolders(bool withfile)
+        {
+            List<SyncFolderInfo> result = new List<SyncFolderInfo>();
+            string[] folders = Directory.GetDirectories(_basepath);
+
+            foreach (string folder in folders)
+                result.Add(GetFolder(folder.Replace(_basepath, ""), withfile));
+
+            return result;
+        }
+
+        /*
         public List<SyncFolderInfo> GetFolders(bool withfile)
         {
             List<SyncFolderInfo> result = new List<SyncFolderInfo>();
@@ -119,6 +184,7 @@ namespace SyncFile.DataAccess.Repository
 
             return result;
         }
+        */
 
         public void CreateFile(string folder, string name, byte[] file)
         {
@@ -142,13 +208,13 @@ namespace SyncFile.DataAccess.Repository
 
         public void DeleteFile(string folder, string file)
         {
-            if (File.Exists(_basepath + folder + "\\" + file))
-                File.Delete(_basepath + folder + "\\" + file);
+            if (File.Exists(folder + "\\" + file))
+                File.Delete(folder + "\\" + file);
         }              
 
         public void UpdateFile(string folder, string file, byte[] data)
         {
-            using (var fs = new FileStream(_basepath + folder + "\\" + file, FileMode.Create, FileAccess.Write))
+            using (var fs = new FileStream(folder + "\\" + file, FileMode.Create, FileAccess.Write))
             {
                 fs.Write(data, 0, data.Length);
             }

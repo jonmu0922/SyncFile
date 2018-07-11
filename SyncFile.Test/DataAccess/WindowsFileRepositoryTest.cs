@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SyncFile.DataAccess.Repository;
+using SyncFile.Domain.Model;
 
 namespace SyncFile.Test.DataAccess
 {
@@ -80,32 +82,29 @@ namespace SyncFile.Test.DataAccess
         [TestMethod]
         public void GetFoldersTest()
         {
-            var folder = windowsfileRep.GetFolders(false);
+            var folder = windowsfileRep.GetFolders(true);
 
+            DebugWriteFolder(folder);            
+        }
+
+        void DebugWriteFolder(List<SyncFolderInfo> folder)
+        {
             foreach (var f in folder)
             {
-                Debug.WriteLine(f.Name);
+                //Debug.WriteLine(f.Name);
                 Debug.WriteLine(f.Path);
-                Debug.WriteLine(f.CreateDate.ToString());
-                Debug.WriteLine(f.UpdateDate.ToString());
-            }
+                //Debug.WriteLine(f.CreateDate.ToString());
+                //Debug.WriteLine(f.UpdateDate.ToString());
 
-            folder = windowsfileRep.GetFolders(true);
-
-            foreach (var f in folder)
-            {
-                Debug.WriteLine(f.Name);
-                Debug.WriteLine(f.Path);
-                Debug.WriteLine(f.CreateDate.ToString());
-                Debug.WriteLine(f.UpdateDate.ToString());
-                Debug.WriteLine("-----------------");
                 foreach (var f2 in f.Files)
                 {
-                    Debug.WriteLine(f2.Name);
+                    //Debug.WriteLine(f2.Name);
                     Debug.WriteLine(f2.Path);
-                    Debug.WriteLine(f2.CreateDate.ToString());
-                    Debug.WriteLine(f2.UpdateDate.ToString());
+                    //Debug.WriteLine(f2.CreateDate.ToString());
+                    //Debug.WriteLine(f2.UpdateDate.ToString());
                 }
+
+                DebugWriteFolder(f.Folders);
             }
         }
     }
