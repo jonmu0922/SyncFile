@@ -75,29 +75,6 @@ namespace SyncFile.DataAccess.Repository
             return GetLastSyncRecord(id);
         }
 
-        /*
-        public List<SyncFileInfo> GetFiles(string folder)
-        {
-            List<SyncFileInfo> result = new List<SyncFileInfo>();
-            string[] files = Directory.GetFiles(_basepath + folder);
-
-            foreach (string name in files)
-            {
-                FileInfo info = new FileInfo(name);
-
-                result.Add(new SyncFileInfo()
-                {
-                    Name = info.Name,
-                    CreateDate = info.CreationTime,
-                    UpdateDate = info.LastWriteTime,
-                    Path = name.Replace(_basepath, "")  // 把路徑換成相對位置
-                });
-            }
-
-            return result;
-        }
-        */
-
         public List<SyncFileInfo> GetFiles(string folder)
         {
             List<SyncFileInfo> result = new List<SyncFileInfo>();
@@ -157,34 +134,6 @@ namespace SyncFile.DataAccess.Repository
 
             return result;
         }
-
-        /*
-        public List<SyncFolderInfo> GetFolders(bool withfile)
-        {
-            List<SyncFolderInfo> result = new List<SyncFolderInfo>();
-            string[] folders = Directory.GetDirectories(_basepath);
-
-            foreach (string folder in folders)
-            {
-                DirectoryInfo info = new DirectoryInfo(folder);
-
-                var syncfolderinfo = new SyncFolderInfo()
-                {
-                    Name = info.Name,
-                    Path = folder,
-                    CreateDate = info.CreationTime,
-                    UpdateDate = info.LastWriteTime
-                };
-
-                if (withfile)
-                    syncfolderinfo.Files = GetFiles(syncfolderinfo.Name);
-
-                result.Add(syncfolderinfo);
-            }
-
-            return result;
-        }
-        */
 
         public void CreateFile(string folder, string name, byte[] file)
         {

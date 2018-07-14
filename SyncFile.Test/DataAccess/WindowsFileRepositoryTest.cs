@@ -91,14 +91,14 @@ namespace SyncFile.Test.DataAccess
         {
             foreach (var f in folder)
             {
-                //Debug.WriteLine(f.Name);
+                Debug.WriteLine(f.Name);
                 Debug.WriteLine(f.Path);
                 //Debug.WriteLine(f.CreateDate.ToString());
                 //Debug.WriteLine(f.UpdateDate.ToString());
 
                 foreach (var f2 in f.Files)
                 {
-                    //Debug.WriteLine(f2.Name);
+                    Debug.WriteLine(f2.Name);
                     Debug.WriteLine(f2.Path);
                     //Debug.WriteLine(f2.CreateDate.ToString());
                     //Debug.WriteLine(f2.UpdateDate.ToString());

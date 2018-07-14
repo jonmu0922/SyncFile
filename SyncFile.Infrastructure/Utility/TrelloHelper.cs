@@ -59,6 +59,15 @@ namespace SyncFile.Infrastructure.Utility
             return httpresult;
         }
 
+        /// <summary>
+        /// add card
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="token"></param>
+        /// <param name="list"></param>
+        /// <param name="name"></param>
+        /// <param name="desc">description</param>
+        /// <returns></returns>
         public static string CreateCard(string key, string token, string list, string name, string desc = "")
         {
             Dictionary<string, string> para = new Dictionary<string, string>
