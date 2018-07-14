@@ -1,4 +1,4 @@
-﻿using SyncFile.Domain.Business;
+﻿using SyncFile.Domain.Interface.Business;
 using SyncFile.Domain.Interface.Repository;
 using SyncFile.Domain.Model;
 using System;

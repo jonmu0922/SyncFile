@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace SyncFile.Domain.Business
+namespace SyncFile.Domain.Interface.Business
 {
     public interface ISyncBusiness
     {

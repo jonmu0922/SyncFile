@@ -3,7 +3,7 @@ using System.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sync.Business;
 using SyncFile.DataAccess.Repository;
-using SyncFile.Domain.Business;
+using SyncFile.Domain.Interface.Business;
 using SyncFile.Domain.Interface.Repository;
 
 namespace SyncFile.Test.Business

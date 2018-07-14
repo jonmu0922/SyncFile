@@ -1,6 +1,6 @@
 ﻿using Sync.Business;
 using SyncFile.DataAccess.Repository;
-using SyncFile.Domain.Business;
+using SyncFile.Domain.Interface.Business;
 using SyncFile.Domain.Interface.Repository;
 using System;
 using System.Collections.Generic;
