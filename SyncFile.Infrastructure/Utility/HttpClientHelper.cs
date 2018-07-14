@@ -61,6 +61,14 @@ namespace SyncFile.Infrastructure.Utility
             }
         }
 
+        /// <summary>
+        /// http post with file
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="para"></param>
+        /// <param name="name"></param>
+        /// <param name="file"></param>
+        /// <returns></returns>
         public static string HttpPost(string url, Dictionary<string, string> para, string name, byte[] file)
         {
             // source from
@@ -135,6 +143,12 @@ namespace SyncFile.Infrastructure.Utility
             return result;
         }    
 
+        /// <summary>
+        /// http delete
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="para"></param>
+        /// <returns></returns>
         public static string HttpDelete(string url, Dictionary<string, string> para)
         {
             using (WebClient client = new WebClient())

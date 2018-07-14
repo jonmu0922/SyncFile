@@ -40,7 +40,9 @@ namespace SyncFile.DataAccess.Repository
                 InitSyncSetting();
             }
         }
-        
+
+        #region SyncSetting
+
         /// <summary>
         /// 取得sync repo 的id
         /// </summary>
@@ -66,13 +68,71 @@ namespace SyncFile.DataAccess.Repository
         /// </summary>
         /// <param name="id"></param>
         public void SaveSync()
-        {            
+        {
             File.WriteAllText(_basepath + _syncsetting, _xdoc.ToString());
         }
 
         public DateTime? GetLastRecord(string id)
         {
             return GetLastSyncRecord(id);
+        }
+
+        #endregion
+
+        #region File 
+
+        public byte[] GetFile(string path)
+        {
+            return File.ReadAllBytes(_basepath + path);
+        }
+
+        public void CreateFile(string folder, string name, byte[] file)
+        {
+            using (var fs = new FileStream(_basepath + folder + "\\" + name, FileMode.Create, FileAccess.Write))
+            {
+                fs.Write(file, 0, file.Length);
+            }
+        }
+
+        public void DeleteFile(string folder, string file)
+        {
+            if (File.Exists(folder + "\\" + file))
+                File.Delete(folder + "\\" + file);
+        }
+
+        public void UpdateFile(string folder, string file, byte[] data)
+        {
+            using (var fs = new FileStream(folder + "\\" + file, FileMode.Create, FileAccess.Write))
+            {
+                fs.Write(data, 0, data.Length);
+            }
+        }
+
+        #endregion
+
+        #region Folder
+
+        public void CreateFolder(string folder)
+        {
+            if (!Directory.Exists(_basepath + folder))
+                Directory.CreateDirectory(_basepath + folder);
+        }
+
+        public void DeleteFolder(string folder)
+        {
+            if (Directory.Exists(_basepath + folder))
+                Directory.Delete(_basepath + folder);
+        }
+
+        public List<SyncFolderInfo> GetFolders(bool withfile)
+        {
+            List<SyncFolderInfo> result = new List<SyncFolderInfo>();
+            string[] folders = Directory.GetDirectories(_basepath);
+
+            foreach (string folder in folders)
+                result.Add(GetFolder(folder.Replace(_basepath, ""), withfile));
+
+            return result;
         }
 
         public List<SyncFileInfo> GetFiles(string folder)
@@ -96,10 +156,9 @@ namespace SyncFile.DataAccess.Repository
             return result;
         }
 
-        public byte[] GetFile(string path)
-        {
-            return File.ReadAllBytes(_basepath + path);
-        }
+        #endregion
+
+        #region Private
 
         SyncFolderInfo GetFolder(string path, bool withfile)
         {
@@ -124,49 +183,6 @@ namespace SyncFile.DataAccess.Repository
             return result;
         }
 
-        public List<SyncFolderInfo> GetFolders(bool withfile)
-        {
-            List<SyncFolderInfo> result = new List<SyncFolderInfo>();
-            string[] folders = Directory.GetDirectories(_basepath);
-
-            foreach (string folder in folders)
-                result.Add(GetFolder(folder.Replace(_basepath, ""), withfile));
-
-            return result;
-        }
-
-        public void CreateFile(string folder, string name, byte[] file)
-        {
-            using (var fs = new FileStream(_basepath + folder + "\\" + name, FileMode.Create, FileAccess.Write))
-            {
-                fs.Write(file, 0, file.Length);            
-            }
-        }
-
-        public void CreateFolder(string folder)
-        {
-            if (!Directory.Exists(_basepath + folder))
-                Directory.CreateDirectory(_basepath + folder);
-        }
-
-        public void DeleteFolder(string folder)
-        {
-            if (Directory.Exists(_basepath + folder))
-                Directory.Delete(_basepath + folder);
-        }
-
-        public void DeleteFile(string folder, string file)
-        {
-            if (File.Exists(folder + "\\" + file))
-                File.Delete(folder + "\\" + file);
-        }              
-
-        public void UpdateFile(string folder, string file, byte[] data)
-        {
-            using (var fs = new FileStream(folder + "\\" + file, FileMode.Create, FileAccess.Write))
-            {
-                fs.Write(data, 0, data.Length);
-            }
-        }
+        #endregion 
     }
 }

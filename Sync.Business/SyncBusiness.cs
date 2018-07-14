@@ -21,17 +21,18 @@ namespace Sync.Business
         }
 
         /// <summary>
-        /// 同步
+        /// 同步檔案
         /// </summary>
         /// <returns></returns>
         public SyncResult Sync()
         {
             SyncResult result = new SyncResult();
 
-            // 上次同步時間
+            // 取得上次同步時間
             DateTime? sourcelastrecord = _source.GetLastRecord(_destination.GetID());
 
             // 先做單向
+            // 取得來源資料夾、檔案
             var folder = _source.GetFolders(true);
 
             foreach (var f in folder)
@@ -46,9 +47,14 @@ namespace Sync.Business
             return result;
         }
 
+        /// <summary>
+        /// 建立資料夾、檔案
+        /// </summary>
+        /// <param name="folder"></param>
+        /// <param name="sourcelastrecord"></param>
         void CreateFolderAndFile(SyncFolderInfo folder, DateTime? sourcelastrecord)
         {
-            _destination.CreateFolder(folder.Path);
+            _destination.CreateFolder(folder.Path); // 新增資料夾
 
             foreach (var file in _source.GetFiles(folder.Path))
             {
@@ -70,54 +76,6 @@ namespace Sync.Business
             {
                 CreateFolderAndFile(o, sourcelastrecord);
             });
-        }
-
-
-        /*
-        /// <summary>
-        /// 同步
-        /// </summary>
-        /// <returns></returns>
-        public SyncResult Sync()
-        {
-            SyncResult result = new SyncResult();
-
-            // 上次同步時間
-            DateTime? sourcelastrecord = _source.GetLastRecord(_destination.GetID());
-
-            // 先做單向
-            var folder = _source.GetFolders(true);
-
-            foreach (var f in folder)
-            {
-                _destination.CreateFolder(f.Name);
-
-                foreach (var file in _source.GetFiles(f.Name))
-                {
-                    // 檢查上次sync時間是否為null或
-                    // 檔案是否在上次sync後有修改
-                    if (!sourcelastrecord.HasValue ||
-                        file.UpdateDate > sourcelastrecord.Value)
-                    {
-                        // 新增檔案
-                        _destination.CreateFile(
-                            f.Name,
-                            file.Name,
-                            _source.GetFile(file.Path)
-                        );
-                        result.File++;
-                    }                    
-                }
-
-                result.Folder++;
-            }
-
-            // 紀錄sync時間
-            _source.SaveSync(_destination.GetID());
-            _destination.SaveSync();
-
-            return result;
-        }
-        */
+        }        
     }
 }

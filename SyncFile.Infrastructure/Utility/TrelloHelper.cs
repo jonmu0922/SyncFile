@@ -87,6 +87,13 @@ namespace SyncFile.Infrastructure.Utility
             return httpresult;
         }
 
+        /// <summary>
+        /// delete card
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="token"></param>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public static string DeleteCard(string key, string token, string id)
         {
             Dictionary<string, string> para = new Dictionary<string, string>

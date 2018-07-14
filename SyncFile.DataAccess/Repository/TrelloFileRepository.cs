@@ -28,6 +28,10 @@ namespace SyncFile.DataAccess.Repository
             JObject obj = cardarray.Children<JObject>()
                             .FirstOrDefault(o => o["name"].ToString() == _rootname);
 
+            /*
+            用 _root card 的 description 
+            儲存 sync xml 資料
+            */
             if (obj == null)
                 InitSyncSetting();  //無 _root 卡片
             else
@@ -43,10 +47,39 @@ namespace SyncFile.DataAccess.Repository
             }
         }
 
+        #region SyncSetting
+
         public string GetID()
         {
             return GetSyncID();
         }
+
+        public void SaveSync(string id)
+        {
+            AddSyncRecord(id);
+
+            SaveSync();
+        }
+
+        public void SaveSync()
+        {
+            // 刪除 root card
+            if (!string.IsNullOrEmpty(_rootcard))
+                TrelloHelper.DeleteCard(_key, _token, _rootcard);
+
+            // 把sync xml record 寫到 root card 的 description
+            TrelloHelper.CreateCard(_key, _token, _list, _rootname, _xdoc.ToString());
+            RefreshCardArray(); // 重新取 card array
+        }
+
+        public DateTime? GetLastRecord(string id)
+        {
+            return GetLastSyncRecord(id);
+        }
+
+        #endregion
+
+        #region File
 
         public void CreateFile(string folder, string name, byte[] file)
         {
@@ -78,7 +111,7 @@ namespace SyncFile.DataAccess.Repository
 
             // fetch file list
             JArray list = JArray.Parse(
-                    TrelloHelper.GetCardAttachmentList(_key, _token, card["id"].Value<string>())); 
+                    TrelloHelper.GetCardAttachmentList(_key, _token, card["id"].Value<string>()));
 
             JObject attachment = list.Children<JObject>()
                             .FirstOrDefault(o => o["name"].ToString() == file);
@@ -105,11 +138,54 @@ namespace SyncFile.DataAccess.Repository
 
             // 已存在，刪除檔案
             if (attachment != null)
-                TrelloHelper.DeleteAttachment(_key, _token, 
+                TrelloHelper.DeleteAttachment(_key, _token,
                     card["id"].Value<string>(), attachment["id"].Value<string>());
 
             TrelloHelper.CreateAttachment(_key, _token, card["id"].Value<string>(), file, data);
         }
+
+        public List<SyncFileInfo> GetFiles(string folder)
+        {
+            List<SyncFileInfo> result = new List<SyncFileInfo>();
+
+            JObject obj = cardarray.Children<JObject>()
+                            .FirstOrDefault(o => o["name"].ToString() == folder);
+
+            if (obj != null)
+            {
+                JArray list = JArray.Parse(
+                    TrelloHelper.GetCardAttachmentList(_key, _token, obj["id"].Value<string>()));
+
+                foreach (JObject o in list.Children<JObject>())
+                {
+                    result.Add(new SyncFileInfo()
+                    {
+                        Name = o["name"].Value<string>(),
+                        Path = o["url"].Value<string>(),
+                        CreateDate = TrelloHelper.IdToDatetime(o["id"].Value<string>()),
+                        UpdateDate = TrelloHelper.IdToDatetime(o["id"].Value<string>()),
+                        Size = o["bytes"].Value<int>()
+                    }
+                    );
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// 取得附件 byte[]
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public byte[] GetFile(string path)
+        {
+            return TrelloHelper.GetAttachment(path);
+        }
+
+        #endregion
+
+        #region Folder
 
         public void CreateFolder(string folder)
         {
@@ -121,7 +197,7 @@ namespace SyncFile.DataAccess.Repository
             {
                 TrelloHelper.CreateCard(_key, _token, _list, folder);
                 RefreshCardArray(); // 重新取 card array
-            }                
+            }
         }
 
         public void DeleteFolder(string folder)
@@ -136,40 +212,11 @@ namespace SyncFile.DataAccess.Repository
             RefreshCardArray(); // 重新取 card array
         }
 
-        public List<SyncFileInfo> GetFiles(string folder)
-        {
-            List<SyncFileInfo> result = new List<SyncFileInfo>();
-           
-            JObject obj = cardarray.Children<JObject>()
-                            .FirstOrDefault(o => o["name"].ToString() == folder);
-
-            if (obj != null)
-            {
-                JArray list = JArray.Parse(
-                    TrelloHelper.GetCardAttachmentList(_key, _token, obj["id"].Value<string>()));
-
-                foreach (JObject o in list.Children<JObject>())
-                {
-                    result.Add(new SyncFileInfo()
-                        {
-                            Name = o["name"].Value<string>(),
-                            Path = o["url"].Value<string>(),
-                            CreateDate = TrelloHelper.IdToDatetime(o["id"].Value<string>()),
-                            UpdateDate = TrelloHelper.IdToDatetime(o["id"].Value<string>()),
-                            Size = o["bytes"].Value<int>()
-                        }
-                    );
-                }
-            }
-
-            return result;            
-        }
-
         public List<SyncFolderInfo> GetFolders(bool withfile)
-        {            
+        {
             //cards in list            
-            List<SyncFolderInfo> folders = new List<SyncFolderInfo>();        
-            
+            List<SyncFolderInfo> folders = new List<SyncFolderInfo>();
+
             foreach (JObject o in cardarray.Children<JObject>())
             {
                 // 排除 root card
@@ -179,7 +226,7 @@ namespace SyncFile.DataAccess.Repository
                 folders.Add(new SyncFolderInfo()
                     {
                         Name = o["name"].Value<string>(),
-                        Path  = o["url"].Value<string>(),
+                        Path = o["url"].Value<string>(),
                         CreateDate = TrelloHelper.IdToDatetime(o["id"].Value<string>()),
                         UpdateDate = TrelloHelper.IdToDatetime(o["id"].Value<string>()),
                     }
@@ -192,6 +239,10 @@ namespace SyncFile.DataAccess.Repository
                     folder.Files = GetFiles(folder.Name);
             }
 
+            /*
+            用 card 轉成 folder的資料
+            處理成實際用的 folder
+            */
             List<SyncFolderInfo> result = new List<SyncFolderInfo>();
 
             foreach (var f in folders)
@@ -199,45 +250,15 @@ namespace SyncFile.DataAccess.Repository
                 // 先找出第一層，名字沒有 \ 的
                 if (f.Name.Split('\\').Count() == 1)
                 {
+                    // card 名字放路徑
                     result.Add(GetFolder(f.Name, withfile, folders));
-                }
+                }                    
             }
 
             return result;
         }
-               
-        /// <summary>
-        /// 取得附件 byte[]
-        /// </summary>
-        /// <param name="path"></param>
-        /// <returns></returns>
-        public byte[] GetFile(string path)
-        {
-            return TrelloHelper.GetAttachment(path);
-        }
 
-        public void SaveSync(string id)
-        {
-            AddSyncRecord(id);
-
-            SaveSync();
-        }
-
-        public void SaveSync()
-        {
-            // 刪除 root card
-            if (!string.IsNullOrEmpty(_rootcard))
-                TrelloHelper.DeleteCard(_key, _token, _rootcard);
-
-            // 把sync xml record 寫到 root card 的 description
-            TrelloHelper.CreateCard(_key, _token, _list, _rootname, _xdoc.ToString());
-            RefreshCardArray(); // 重新取 card array
-        }
-
-        public DateTime? GetLastRecord(string id)
-        {
-            return GetLastSyncRecord(id);
-        }
+        #endregion
 
         #region Private       
 

@@ -15,6 +15,8 @@ namespace SyncFile.Domain.Interface.Repository
             return _xdoc.Element("sync").Element("id").Value;
         }
 
+        #region xml 設定檔操作
+        
         /// <summary>
         /// 初始化設定檔
         /// </summary>
@@ -25,7 +27,8 @@ namespace SyncFile.Domain.Interface.Repository
 
             XElement id = new XElement("id")
             {
-                Value = Guid.NewGuid().ToString()
+                // 建立repo的id
+                Value = Guid.NewGuid().ToString()   
             };
 
             root.Add(id);
@@ -33,7 +36,7 @@ namespace SyncFile.Domain.Interface.Repository
         }
 
         /// <summary>
-        /// 取得最後一筆同步資料
+        /// 取得指定repo的最後一筆同步資料
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
@@ -70,5 +73,7 @@ namespace SyncFile.Domain.Interface.Repository
 
             _xdoc.Element("sync").Element("records").Add(history);
         }
+
+        #endregion
     }
 }
