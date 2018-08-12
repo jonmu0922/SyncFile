@@ -22,6 +22,12 @@ namespace SyncFile.Domain.Interface.Repository
         void SaveSync(string id);
 
         /// <summary>
+        /// 新增一筆同步紀錄，並儲存sync setting
+        /// </summary>
+        /// <param name="id"></param>
+        void SaveSync(string id, SyncResult result);
+
+        /// <summary>
         /// 儲存sync setting
         /// </summary>
         void SaveSync();
@@ -49,7 +55,7 @@ namespace SyncFile.Domain.Interface.Repository
 
         List<SyncFolderInfo> GetFolders(bool withfile);
         void DeleteFolder(string folder);
-        void CreateFolder(string folder);
+        bool CreateFolder(string folder);
 
         #endregion
     }

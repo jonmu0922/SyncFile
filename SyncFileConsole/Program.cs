@@ -34,7 +34,12 @@ namespace SyncFileConsole
                 FileRepositoryFactory((NameValueCollection)ConfigurationManager.GetSection("SyncDestination"))
             );
 
-            syncbusiness.Sync();
+            var result = syncbusiness.Sync();
+
+            Console.WriteLine("Folder:" + result.Folder);
+            Console.WriteLine("File:" + result.File);
+
+            Console.Read();
         }
 
         static IFileRepository FileRepositoryFactory(NameValueCollection nvc)

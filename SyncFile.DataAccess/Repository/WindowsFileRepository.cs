@@ -63,6 +63,13 @@ namespace SyncFile.DataAccess.Repository
             SaveSync();
         }
 
+        public void SaveSync(string id, SyncResult result)
+        {
+            AddSyncRecord(id, result);
+
+            SaveSync();
+        }
+
         /// <summary>
         /// 儲存sync setting
         /// </summary>
@@ -112,10 +119,15 @@ namespace SyncFile.DataAccess.Repository
 
         #region Folder
 
-        public void CreateFolder(string folder)
+        public bool CreateFolder(string folder)
         {
             if (!Directory.Exists(_basepath + folder))
+            {
                 Directory.CreateDirectory(_basepath + folder);
+                return true;
+            }
+
+            return false;
         }
 
         public void DeleteFolder(string folder)

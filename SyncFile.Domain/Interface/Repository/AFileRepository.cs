@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Xml.Linq;
 using System.Linq;
+using SyncFile.Domain.Model;
 
 namespace SyncFile.Domain.Interface.Repository
 {
@@ -68,6 +69,26 @@ namespace SyncFile.Domain.Interface.Repository
                 Value = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")
             };
 
+            if (_xdoc.Element("sync").Element("records") == null)
+                _xdoc.Element("sync").Add(new XElement("records"));
+
+            _xdoc.Element("sync").Element("records").Add(history);
+        }
+
+        /// <summary>
+        /// 新增一筆同步紀錄
+        /// </summary>
+        /// <param name="id"></param>
+        protected void AddSyncRecord(string id, SyncResult result)
+        {
+            XElement history = new XElement("record", 
+                new XAttribute("id", id), 
+                new XAttribute("file", result.File), 
+                new XAttribute("folder", result.Folder))
+            {
+                Value = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")
+            };
+            
             if (_xdoc.Element("sync").Element("records") == null)
                 _xdoc.Element("sync").Add(new XElement("records"));
 

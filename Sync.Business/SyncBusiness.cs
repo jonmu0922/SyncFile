@@ -37,11 +37,12 @@ namespace Sync.Business
 
             foreach (var f in folder)
             {
-                CreateFolderAndFile(f, sourcelastrecord);                
+                CreateFolderAndFile(f, sourcelastrecord, result);                
             }
 
             // 紀錄sync時間
-            _source.SaveSync(_destination.GetID());
+            //_source.SaveSync(_destination.GetID());
+            _source.SaveSync(_destination.GetID(), result);
             _destination.SaveSync();
 
             return result;
@@ -52,9 +53,11 @@ namespace Sync.Business
         /// </summary>
         /// <param name="folder"></param>
         /// <param name="sourcelastrecord"></param>
-        void CreateFolderAndFile(SyncFolderInfo folder, DateTime? sourcelastrecord)
+        void CreateFolderAndFile(SyncFolderInfo folder, DateTime? sourcelastrecord, SyncResult result)
         {
-            _destination.CreateFolder(folder.Path); // 新增資料夾
+            // 新增資料夾
+            if (_destination.CreateFolder(folder.Path)) 
+                result.Folder++; // 若實際有增新資料夾，影響的資料夾+1
 
             foreach (var file in _source.GetFiles(folder.Path))
             {
@@ -63,6 +66,8 @@ namespace Sync.Business
                 if (!sourcelastrecord.HasValue ||
                     file.UpdateDate > sourcelastrecord.Value)
                 {
+                    result.File++; // 影響的檔案+1
+
                     // 新增檔案
                     _destination.CreateFile(
                         folder.Path,
@@ -74,7 +79,7 @@ namespace Sync.Business
 
             folder.Folders.ForEach(o =>
             {
-                CreateFolderAndFile(o, sourcelastrecord);
+                CreateFolderAndFile(o, sourcelastrecord, result);
             });
         }        
     }

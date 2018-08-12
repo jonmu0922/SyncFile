@@ -12,7 +12,7 @@ namespace SyncFile.DataAccess.Repository
 {
     public class TrelloFileRepository : AFileRepository, IFileRepository
     {
-        string _key = "", _token = "", _list = "", 
+        string _key = "", _token = "", _list = "",
                _rootname = "_root", // root card name 
                _rootcard = "";      // root card id
 
@@ -57,6 +57,13 @@ namespace SyncFile.DataAccess.Repository
         public void SaveSync(string id)
         {
             AddSyncRecord(id);
+
+            SaveSync();
+        }
+
+        public void SaveSync(string id, SyncResult result)
+        {
+            AddSyncRecord(id, result);
 
             SaveSync();
         }
@@ -187,7 +194,7 @@ namespace SyncFile.DataAccess.Repository
 
         #region Folder
 
-        public void CreateFolder(string folder)
+        public bool CreateFolder(string folder)
         {
             JObject obj = cardarray.Children<JObject>()
                             .FirstOrDefault(o => o["name"].ToString() == folder);
@@ -197,7 +204,10 @@ namespace SyncFile.DataAccess.Repository
             {
                 TrelloHelper.CreateCard(_key, _token, _list, folder);
                 RefreshCardArray(); // 重新取 card array
+                return true;
             }
+
+            return false;
         }
 
         public void DeleteFolder(string folder)
